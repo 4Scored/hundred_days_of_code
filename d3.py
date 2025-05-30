@@ -1,3 +1,5 @@
+# treasure island text game
+
 print("Welcome to Treasure Island.\nYour mission is to find the treausre.")
 i1 = input("left or right? (left or right) ")
 if i1 == "right": 

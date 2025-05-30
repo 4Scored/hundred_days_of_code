@@ -1,3 +1,5 @@
+# rock paper scissors w/ computer
+
 import random
 
 def rpc(choice):
