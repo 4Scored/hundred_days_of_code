@@ -11,3 +11,5 @@
     # finally: # do this no matter what happens
 
     # raise: # raise your own exception (ex. "raise TypeError("This is a TypeError I raised")")
+
+# changes made to d26 (phonetic alphabet), implemented try, except, else functionality
