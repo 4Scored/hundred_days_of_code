@@ -13,3 +13,4 @@
     # raise: # raise your own exception (ex. "raise TypeError("This is a TypeError I raised")")
 
 # changes made to d26 (phonetic alphabet), implemented try, except, else functionality
+# changes made to d29 (password manager), implemented json functionality and find_password()
