@@ -7,6 +7,7 @@ from notification_manager import NotificationManager
 from datetime import datetime, timedelta
 
 ORIGIN_CITY_IATA = "LON"
+email_list = [] # fill out
 
 data_manager = DataManager()
 sheet_data = data_manager.get_dest_data()
@@ -28,8 +29,6 @@ for destination in sheet_data:
     flights = flight_search.check_flights(ORIGIN_CITY_IATA, destination["iataCode"], from_time=tomorrow, to_time=six_month_from_today)
     cheapest_flight = flight_data.find_cheapest_flight(flights)
     if cheapest_flight.price != "N/A" and cheapest_flight.price < destination["lowestPrice"]:    
-        notification_manager.send_msg(
-            message_body=f"Low price alert! Only £{cheapest_flight.price} to fly "
-                         f"from {cheapest_flight.origin_airport} to {cheapest_flight.destination_airport}, "
-                         f"on {cheapest_flight.out_date} until {cheapest_flight.return_date}."
-        )
+        message_body=f"Low price alert! Only £{cheapest_flight.price} to fly from {cheapest_flight.origin_airport} to {cheapest_flight.destination_airport}, on {cheapest_flight.out_date} until {cheapest_flight.return_date}."
+        notification_manager.send_msg(message_body)
+        notification_manager.send_emails(email_list=email_list, email_body=message_body)
