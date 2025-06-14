@@ -1,1 +1,13 @@
 .DS_Store
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+.venv/
+venv/
+env/
+pip-log.txt
+*.egg-info/
+dist/
+build/
