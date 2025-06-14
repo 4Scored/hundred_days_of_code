@@ -3,8 +3,8 @@ import requests
 from datetime import datetime
 
 user_token = os.environ.get("PIXELA_TOKEN")
-user_username = "username9000"
-graph_id = "graph1"
+user_username = os.environ.get("PIXELA_USERNAME")
+graph_id = os.environ.get("PIXELA_GRAPH_ID")
 today = datetime(year=2025,month=6,day=12) # or "today = datetime.now()"
 
 PIXELA_ENDPOINT = "https://pixe.la/v1/users"
