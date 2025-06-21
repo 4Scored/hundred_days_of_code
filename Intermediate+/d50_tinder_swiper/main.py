@@ -11,13 +11,18 @@ driver = webdriver.Chrome(options=chrome_opts)
 driver.get("https://tinder.com/")
 sleep(10)
 
-login_button = driver.find_element(By.CLASS_NAME, value="lxn9zzn")
-login_button.click()
+# locating facebook log-in process
+allow_cookies_btn = driver.find_element(By.XPATH, value="//*[@id='u964729768']/div/div[2]/div/div/div[1]/div[1]/button")
+allow_cookies_btn.click()
+sleep(5)
+login_btn = driver.find_element(By.CLASS_NAME, value="lxn9zzn")
+login_btn.click()
 sleep(5)
 find_fb_login = driver.find_element(By.CLASS_NAME, value="Mend(a)")
 find_fb_login.click()
 sleep(5)
 
+# facebook login
 tinder_window = driver.window_handles[0]
 fb_login_window = driver.window_handles[1]
 driver.switch_to.window(fb_login_window)
@@ -31,16 +36,14 @@ window_login_button.send_keys(Keys.ENTER)
 driver.switch_to.window(tinder_window)
 sleep(5)
 
-allow_location_button = driver.find_element(By.XPATH, value="/html/body/div[2]/div/div/div/div/div[3]/button[1]/span")
-allow_location_button.click()
-notifications_button = driver.find_element(By.XPATH, value="/html/body/div[2]/div/div/div/div/div[3]/button[2]/span")
-notifications_button.click()
-cookies = driver.find_element(By.XPATH, value="/html/body/div[1]/div/div[2]/div/div/div[1]/div[1]/button/span")
-cookies.click()
+allow_location_btn = driver.find_element(By.XPATH, value="/html/body/div[2]/div/div/div/div/div[3]/button[1]/span")
+allow_location_btn.click()
+notifications_btn = driver.find_element(By.XPATH, value="/html/body/div[2]/div/div/div/div/div[3]/button[2]/span")
+notifications_btn.click()
 
 for i in range(100): 
     sleep(3)
-    try:                            
+    try:                  
         like_button = driver.find_element(By.XPATH, value="/html/body/div[1]/div/div[1]/div/main/div[1]/div/div/div[1]/div[1]/div/div[4]/div/div[4]/button")
         like_button.click()    
     except ElementClickInterceptedException: # matched
