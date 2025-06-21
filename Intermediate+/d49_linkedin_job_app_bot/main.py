@@ -1,4 +1,5 @@
 # (in case) can be blacklisted for using bots
+# not risking it, my attempt at this
 
 import os
 from time import sleep
