@@ -33,7 +33,7 @@ class InstaFollower:
     def find_followers(self):
         self.driver.get(f"https://www.instagram.com/{SIMILAR_ACCOUNT}/followers")
         sleep(5)    
-        followers = self.driver.find_element(By.XPATH, value="/html/body/div[5]/div[2]/div/div/div[1]/div/div[2]/div/div/div/div/div[2]/div/div/div[3]/div[1]") # xpath subject to change
+        followers = self.driver.find_element(By.XPATH, value="/html/body/div[5]/div[2]/div/div/div[1]/div/div[2]/div/div/div/div/div[2]/div/div/div[3]/div[1]/div") # xpath subject to change
         for _ in range(15):
             self.driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", followers)
             sleep(2)
