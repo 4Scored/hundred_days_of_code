@@ -14,9 +14,11 @@ def home():
 
 @app.route("/guess/<name>")
 def get_guess(name):
-    gender_called = requests.get(f"https://api.genderize.io?name={name}").json()["gender"]
-    age_called = requests.get(f"https://api.agify.io?name={name}").json()["age"]
-    return render_template("name_age.html", name=name, gender=gender_called, age=age_called)
+    gender_called = requests.get(f"https://api.genderize.io?name={name}").json()
+    gender = gender_called["gender"]
+    age_called = requests.get(f"https://api.agify.io?name={name}").json()
+    age = age_called["age"]
+    return render_template("name_age.html", name=name, gender=gender, age=age)
 
 @app.route("/blog/<num>")
 def get_blog(num):

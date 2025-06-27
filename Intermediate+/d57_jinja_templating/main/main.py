@@ -2,7 +2,7 @@ import requests
 from post import Post
 from flask import Flask, render_template
 
-posts = requests.get("https://www.npoint.io/docs/c790b4d5cab58020d391")
+posts = requests.get("https://api.npoint.io/c790b4d5cab58020d391")
 posts.raise_for_status()
 posts = posts.json()
 all_posts = []
@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return render_template("index.html", all_post=all_posts)
+    return render_template("index.html", all_posts=all_posts)
 
 @app.route('/post/<int:num_to_show>')
 def show_specific_post(num_to_show):
