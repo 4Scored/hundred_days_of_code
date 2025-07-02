@@ -3,6 +3,7 @@ from flask import Flask, render_template
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, Length
+from flask_bootstrap import Bootstrap5
 
 class LoginForm(FlaskForm):
     email = StringField(label="email", validators=[DataRequired(), Email(message="Invalid email address.")])
@@ -12,6 +13,7 @@ class LoginForm(FlaskForm):
 app = Flask(__name__)
 app.secret_key = os.environ.get("APP_SECRET_KEY")
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+bootstrap = Bootstrap5(app)
 
 @app.route("/")
 def home():
@@ -29,15 +31,6 @@ def login():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-
-
-
-
-
-
 
 '''
 Red underlines? Install the required packages first: 
