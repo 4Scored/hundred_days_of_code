@@ -1,4 +1,4 @@
-# import sqlite3
+# SQLAlchemy 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -43,7 +43,9 @@ with app.app_context():
     db.session.commit()
 
 
-# # SQLite section
+# # SQLite
+
+# import sqlite3
 
 # db = sqlite3.connect("books-collection.db")
 # cursor = db.cursor()
