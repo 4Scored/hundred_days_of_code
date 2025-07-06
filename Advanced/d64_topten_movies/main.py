@@ -1,4 +1,5 @@
 import os
+import requests
 from flask import Flask, render_template, request, redirect, url_for
 from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
@@ -7,6 +8,11 @@ from sqlalchemy import Integer, String, Float
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
+
+TMDB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie"
+TMDB_API_KEY = os.environ.get("TMDB_API_KEY")
+
+MOVIEDB_IMAGE_URL = "https://image.tmdb.org/t/p/w500"
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("APP_SECRET_KEY")
@@ -54,14 +60,14 @@ def home():
     all_movies = selected_movies.scalars().all()
     return render_template("index.html", movies=all_movies) #, movies_len=len(all_movies))
 
-class RateMovieForm(FlaskForm):
+class UpdateMovieForm(FlaskForm):
     rating = StringField("Your Rating out of 10 e.g. 7.5", validators=[DataRequired()])
     review = StringField("Your Review", validators=[DataRequired()])
     submit = SubmitField("Done")
 
 @app.route("/edit", methods=["GET", "POST"])
 def update():
-    form = RateMovieForm()    
+    form = UpdateMovieForm()    
     movie_to_update = db.get_or_404(Movie, request.args.get("id"))
     if request.method == "POST" and form.validate_on_submit():
         movie_to_update.rating = float(form.rating.data)
@@ -76,6 +82,38 @@ def delete():
     db.session.delete(movie_to_delete)
     db.session.commit()
     return redirect(url_for("home"))
+
+class AddMovieForm(FlaskForm):    
+    title = StringField("Movie Title", validators=[DataRequired()])
+    submit = SubmitField("Done")
+
+@app.route("/add", methods=["GET", "POST"])
+def add():
+    form = AddMovieForm()
+    if request.method == "POST" and form.validate_on_submit():
+        movie_title = form.title.data
+        tmdb_response = requests.get(TMDB_SEARCH_URL, params={"api_key": TMDB_API_KEY, "query": movie_title})
+        movie_options = tmdb_response.json()["results"]
+        return render_template("select.html", options=movie_options)
+    return render_template("add.html", form=form)
+
+
+@app.route("/fetch", methods=["GET", "POST"])
+def fetch():
+    movie_id = requests.args.get("id")
+    if movie_id: # exists
+        movie_id_url = f"{TMDB_SEARCH_URL}/{movie_id}"
+        movie_id_response = requests.get(movie_id_url, params={"api_key": TMDB_API_KEY})
+        movie_id_data = movie_id_response.json()
+        movie_to_add = Movie(
+            title=movie_id_data["title"],            
+            year=movie_id_data["release_date"].split("-")[0], # only year, disregard mo and day
+            img_url=f"{MOVIEDB_IMAGE_URL}{movie_id_data['poster_path']}",            
+            description=movie_id_data["overview"]
+        )
+        db.session.add(movie_to_add)
+        db.session.commit()
+        return redirect(url_for("update"), id=movie_to_add.id)
 
 if __name__ == '__main__':
     app.run(debug=True)
