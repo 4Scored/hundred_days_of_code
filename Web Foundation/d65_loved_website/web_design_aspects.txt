@@ -1,0 +1,17 @@
+- Color Theory
+- Typography
+- UI Design (Attention Management)
+  - Color
+  - Layout
+  - Alignment
+  - Whitespace
+  - Audience
+- UX (User Experience)
+  - Simplicity
+  - Consistency
+  - Reading Patterns
+  - All Platform Designs
+  - Don't Use Your Powers For Evil
+
+My attempt
+- https://raindredgeranch.my.canva.site/rain-dredge-ranch-webdesign
