@@ -13,6 +13,7 @@ TMDB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie"
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY")
 
 MOVIEDB_IMAGE_URL = "https://image.tmdb.org/t/p/w500"
+MOVIEDB_INFO_URL = "https://api.themoviedb.org/3/movie"
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("APP_SECRET_KEY")
@@ -58,6 +59,9 @@ class Movie(db.Model):
 def home():    
     selected_movies = db.session.execute(db.select(Movie))
     all_movies = selected_movies.scalars().all()
+    for i in range(len(all_movies)):
+        all_movies[i].ranking = len(all_movies) - i
+    db.session.commit()
     return render_template("index.html", movies=all_movies) #, movies_len=len(all_movies))
 
 class UpdateMovieForm(FlaskForm):
@@ -102,7 +106,7 @@ def add():
 def fetch():
     movie_id = requests.args.get("id")
     if movie_id: # exists
-        movie_id_url = f"{TMDB_SEARCH_URL}/{movie_id}"
+        movie_id_url = f"{MOVIEDB_INFO_URL}/{movie_id}"
         movie_id_response = requests.get(movie_id_url, params={"api_key": TMDB_API_KEY})
         movie_id_data = movie_id_response.json()
         movie_to_add = Movie(
