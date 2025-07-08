@@ -27,7 +27,7 @@ class Cafe(db.Model):
     can_take_calls: Mapped[bool] = mapped_column(Boolean, nullable=False)
     coffee_price: Mapped[str] = mapped_column(String(250), nullable=True)
 
-    def to_dict(self): # helper function; makes it clear as well
+    def to_dict(self): # helper function
         return {
             "id": self.id,
             "name": self.name,
@@ -93,14 +93,32 @@ def add_cafe():
     return jsonify(added_cafe=cafe_to_add.to_dict())
 
 # HTTP PUT/PATCH - Update Record
+@app.route("/update-price/<int:cafe_id>", methods=["PATCH"])
+def update_cafe(cafe_id):
+    new_price = request.args.get("new_price")
+    cafe_to_update = db.get_or_404(Cafe, cafe_id)
+    if not cafe_to_update: # doesn't exist
+        return jsonify(response={"cafe DNE": f"{cafe_id} DNE"})
+    cafe_to_update.coffee_price = new_price    
+    db.session.commit()
+    return jsonify(updated_cafe=cafe_to_update.to_dict())
 
 # HTTP DELETE - Delete Record
-
+@app.route("/report-closed/<int:cafe_id>", methods=["DELETE"])
+def delete_cafe(cafe_id):
+    api_key_check = request.args.get("api-key")
+    cafe_to_delete = db.get_or_404(Cafe, cafe_id)    
+    if api_key_check == "TopSecretAPIKey":
+        if not cafe_to_delete: # doesn't exist
+            return jsonify(response={"cafe DNE": f"{cafe_id} DNE"})
+        db.session.delete(cafe_to_delete)
+        db.session.commit()
+        return jsonify(deleted_cafe=cafe_to_delete.to_dict())
+    else:
+        return jsonify(response={"Key": "Incorrect Deletion Key"})
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
 
 '''
 Install the required packages first: 
