@@ -74,6 +74,23 @@ def get_searched_cafe():
     return jsonify(cafes=searched_cafe_jsons)
 
 # HTTP POST - Create Record
+@app.route("/add", methods=["POST"])
+def add_cafe():
+    cafe_to_add = Cafe(
+        name=request.form.get("name"), # form from postman
+        map_url=request.form.get("map_url"),
+        img_url=request.form.get("img_url"),
+        location=request.form.get("location"),
+        has_sockets=bool(request.form.get("sockets")),
+        has_toilet=bool(request.form.get("toilet")),
+        has_wifi=bool(request.form.get("wifi")),
+        can_take_calls=bool(request.form.get("calls")),
+        seats=request.form.get("seats"),
+        coffee_price=request.form.get("coffee_price"),
+    )
+    db.session.add(cafe_to_add)
+    db.session.commit()
+    return jsonify(added_cafe=cafe_to_add.to_dict())
 
 # HTTP PUT/PATCH - Update Record
 
