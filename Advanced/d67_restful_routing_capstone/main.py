@@ -59,7 +59,7 @@ class AddBlogPost(FlaskForm):
 
 @app.route("/new-post", methods=["GET", "POST"])
 def add_new_post():
-    form = AddBlogPost()        
+    form = AddBlogPost() 
     if request.method == "POST" and form.validate_on_submit():        
         post_to_add = BlogPost(
             title = form.title.data,
@@ -75,6 +75,25 @@ def add_new_post():
     return render_template("make-post.html", form=form)
 
 # TODO: edit_post() to change an existing blog post
+@app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
+def edit_post(post_id):    
+    post_to_edit = db.get_or_404(BlogPost, post_id)    
+    edit_form = AddBlogPost( # prepopulating with the post_to_edit's specifics
+        title=post_to_edit.title,
+        subtitle=post_to_edit.subtitle,
+        img_url=post_to_edit.img_url,
+        author=post_to_edit.author,
+        body=post_to_edit.body
+    )
+    if edit_form.validate_on_submit(): # change on edited post on submission
+        post_to_edit.title = edit_form.title.data
+        post_to_edit.subtitle = edit_form.subtitle.data
+        post_to_edit.img_url = edit_form.img_url.data
+        post_to_edit.author = edit_form.author.data
+        post_to_edit.body = edit_form.body.data   
+        db.session.commit()
+        return redirect(url_for("show_post", post_id=post_to_edit.id)) 
+    return render_template("make-post.html", form=edit_form, editing=True)
 
 # TODO: delete_post() to remove a blog post from the database
 
