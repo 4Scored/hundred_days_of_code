@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -11,8 +11,9 @@ from flask_ckeditor import CKEditor, CKEditorField
 from datetime import date
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get("API_SECRET_KEY")
+app.config['SECRET_KEY'] = os.environ.get("APP_SECRET_KEY")
 Bootstrap5(app)
+ckeditor = CKEditor(app)
 
 # CREATE DATABASE
 class Base(DeclarativeBase):
@@ -48,6 +49,30 @@ def show_post(post_id):
     return render_template("post.html", post=requested_post)
 
 # TODO: add_new_post() to create a new blog post
+class AddBlogPost(FlaskForm):    
+    title = StringField("Blog Post Title", validators=[DataRequired()])
+    subtitle = StringField("Subtitle", validators=[DataRequired()])
+    author = StringField("Your Name", validators=[DataRequired()])
+    img_url = StringField("Blog Image URL", validators=[DataRequired(), URL()])
+    body = CKEditorField("Blog Content", validators=[DataRequired()])    
+    submit = SubmitField("Done")
+
+@app.route("/new-post", methods=["GET", "POST"])
+def add_new_post():
+    form = AddBlogPost()        
+    if request.method == "POST" and form.validate_on_submit():        
+        post_to_add = BlogPost(
+            title = form.title.data,
+            subtitle = form.subtitle.data,
+            date = date.today().strftime("%B %d, %Y"),
+            body = form.body.data,
+            author = form.author.data,
+            img_url = form.img_url.data
+        )
+        db.session.add(post_to_add)
+        db.session.commit()
+        return redirect(url_for("get_all_posts")) 
+    return render_template("make-post.html", form=form)
 
 # TODO: edit_post() to change an existing blog post
 
