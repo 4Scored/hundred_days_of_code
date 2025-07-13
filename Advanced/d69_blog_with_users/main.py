@@ -1,6 +1,6 @@
 import os
 from datetime import date
-from flask import Flask, abort, render_template, redirect, url_for, flash
+from flask import Flask, abort, render_template, redirect, url_for, flash, request
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor
 from flask_gravatar import Gravatar
@@ -32,7 +32,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
-
 # CONFIGURE TABLES
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"
@@ -44,30 +43,41 @@ class BlogPost(db.Model):
     author: Mapped[str] = mapped_column(String(250), nullable=False)
     img_url: Mapped[str] = mapped_column(String(250), nullable=False)
 
-
 # TODO: Create a User table for all your registered users. 
-
+class User(UserMixin, db.Model):
+    __tablename__ = "registered_users"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    email: Mapped[str] = mapped_column(String(250), nullable=False)
+    password: Mapped[str] = mapped_column(String(250), nullable=False)
+    name: Mapped[str] = mapped_column(String(250), nullable=False)    
 
 with app.app_context():
     db.create_all()
 
-
 # TODO: Use Werkzeug to hash the user's password when creating a new user.
-@app.route('/register')
+@app.route('/register', methods=["GET", "POST"])
 def register():
-    return render_template("register.html")
-
+    form = RegisterForm()
+    if request.method == "POST" and form.validate_on_submit(): 
+        user_to_register = User(
+            email = form.email.data,
+            password = generate_password_hash(form.password.data, "pbkdf2:sha256", 8),
+            name = form.name.data,
+        )    
+        db.session.add(user_to_register)            
+        db.session.commit()            
+        login_user(user_to_register)
+        return redirect(url_for('get_all_posts')) 
+    return render_template("register.html", form=form)
 
 # TODO: Retrieve a user from the database based on their email. 
 @app.route('/login')
 def login():
     return render_template("login.html")
 
-
 @app.route('/logout')
 def logout():
     return redirect(url_for('get_all_posts'))
-
 
 @app.route('/')
 def get_all_posts():
@@ -75,13 +85,11 @@ def get_all_posts():
     posts = result.scalars().all()
     return render_template("index.html", all_posts=posts)
 
-
 # TODO: Allow logged-in users to comment on posts
 @app.route("/post/<int:post_id>")
 def show_post(post_id):
     requested_post = db.get_or_404(BlogPost, post_id)
     return render_template("post.html", post=requested_post)
-
 
 # TODO: Use a decorator so only an admin user can create a new post
 @app.route("/new-post", methods=["GET", "POST"])
@@ -100,7 +108,6 @@ def add_new_post():
         db.session.commit()
         return redirect(url_for("get_all_posts"))
     return render_template("make-post.html", form=form)
-
 
 # TODO: Use a decorator so only an admin user can edit a post
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
@@ -123,7 +130,6 @@ def edit_post(post_id):
         return redirect(url_for("show_post", post_id=post.id))
     return render_template("make-post.html", form=edit_form, is_edit=True)
 
-
 # TODO: Use a decorator so only an admin user can delete a post
 @app.route("/delete/<int:post_id>")
 def delete_post(post_id):
@@ -132,16 +138,13 @@ def delete_post(post_id):
     db.session.commit()
     return redirect(url_for('get_all_posts'))
 
-
 @app.route("/about")
 def about():
     return render_template("about.html")
 
-
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
-
 
 if __name__ == "__main__":
     app.run(debug=True, port=5002)
