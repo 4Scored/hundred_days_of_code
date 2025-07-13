@@ -1,0 +1,4 @@
+- already familiar
+- useful resources
+  - https://github.com/github/gitignore
+  - https://learngitbranching.js.org/
