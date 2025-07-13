@@ -25,6 +25,9 @@ login_manager.init_app(app)
 def load_user(user_id): 
     return db.session.get(User, user_id) # User, not BlogPost
 
+# for comment pfps
+gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False, force_lower=False, use_ssl=False, base_url=None)
+
 def admin_only(f): # decorator
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -48,6 +51,7 @@ class User(UserMixin, db.Model): # TODO: Create a User table for all your regist
     password: Mapped[str] = mapped_column(String(250), nullable=False)
     name: Mapped[str] = mapped_column(String(250), nullable=False) 
     posts = relationship("BlogPost", back_populates="author")
+    comments = relationship("Comment", back_populates="comment_author")
 
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"    
@@ -59,6 +63,16 @@ class BlogPost(db.Model):
     date: Mapped[str] = mapped_column(String(250), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)    
     img_url: Mapped[str] = mapped_column(String(250), nullable=False)
+    comments = relationship("Comment", back_populates="comment_blogpost") 
+
+class Comment(db.Model):
+    __tablename__ = "comments"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    comment_author_id: Mapped[int] = mapped_column(ForeignKey("registered_users.id"))
+    comment_author = relationship("User", back_populates="comments")
+    comment_blogpost_id: Mapped[str] = mapped_column(ForeignKey("blog_posts.id"))
+    comment_blogpost = relationship("BlogPost", back_populates="comments")
+    text: Mapped[str] = mapped_column(Text, nullable=False)
 
 with app.app_context():
     db.create_all()
@@ -78,7 +92,7 @@ def register():
             flash("You've already signed up with that email, log in instead!")
             return redirect(url_for('login'))
         else: # register them            
-            db.session.add(user_to_register)            
+            db.session.add(user_to_register) 
             db.session.commit()            
             login_user(user_to_register)
             return redirect(url_for('get_all_posts')) 
@@ -114,10 +128,22 @@ def get_all_posts():
     return render_template("index.html", all_posts=posts, current_user=current_user)
 
 # TODO: Allow logged-in users to comment on posts
-@app.route("/post/<int:post_id>")
+@app.route("/post/<int:post_id>", methods=["GET", "POST"])
 def show_post(post_id):
+    form = CommentForm() 
     requested_post = db.get_or_404(BlogPost, post_id)
-    return render_template("post.html", post=requested_post, current_user=current_user)
+    if form.validate_on_submit():
+        if not current_user.is_authenticated:
+            flash("You need to login or register to comment.")
+            return redirect(url_for('login'))
+        comment_to_add = Comment( 
+            text = form.comment.data,
+            comment_author = current_user,
+            comment_blogpost = requested_post,
+        )
+        db.session.add(comment_to_add)            
+        db.session.commit()       
+    return render_template("post.html", form=form, post=requested_post, comments=requested_post.comments, current_user=current_user)
 
 # TODO: Use a decorator so only an admin user can create a new post
 @app.route("/new-post", methods=["GET", "POST"])
